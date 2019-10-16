@@ -766,6 +766,20 @@ type structField struct {
 func (parser *Parser) parseStructField(pkgName string, field *ast.Field) (map[string]spec.Schema, []string, error) {
 	properties := map[string]spec.Schema{}
 
+	if field.Tag != nil{
+		i := strings.Index(field.Tag.Value, "swagger")
+		if i > -1 {
+			b := strings.Split(field.Tag.Value, " ")
+			for _, item := range b {
+				swaggerIndex := strings.Index(item, "swagger")
+				ignoreIndex := strings.Index(item, "ignore")
+				if swaggerIndex > -1 && ignoreIndex > -1 {
+					Println("ignore swagger field ", pkgName, field.Names)
+					return properties, []string{}, nil
+				}
+			}
+		}
+	}
 	if field.Names == nil {
 		fullTypeName, err := getFieldType(field.Type)
 		if err != nil {
